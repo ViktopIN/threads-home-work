@@ -9,6 +9,11 @@ import UIKit
 
 class ViewController: UIViewController {
 //  MARK: - Properties
+    private var mainView: View? {
+        guard isViewLoaded else { return nil }
+        return view as? View
+    }
+    
     var isBlack: Bool = false {
         didSet {
             if isBlack {
@@ -41,9 +46,47 @@ class ViewController: UIViewController {
 //  MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
+        mainView?.textField.isSecureTextEntry = true
+        
+        self.bruteForce(passwordToUnlock: "1!gr")
+        
+        // Do any additional setup after loading the view.
     }
-
-
 }
 
+//  MARK: - Extenions
+extension String {
+    mutating func replace(at index: Int, with character: Character) {
+        var stringArray = Array(self)
+        stringArray[index] = character
+        self = String(stringArray)
+    }
+}
+
+func indexOf(character: Character, _ array: [String]) -> Int {
+    return array.firstIndex(of: String(character))!
+}
+
+func characterAt(index: Int, _ array: [String]) -> Character {
+    return index < array.count ? Character(array[index])
+                               : Character("")
+}
+
+func generateBruteForce(_ string: String, fromArray array: [String]) -> String {
+    var str: String = string
+
+    if str.count <= 0 {
+        str.append(characterAt(index: 0, array))
+    }
+    else {
+        str.replace(at: str.count - 1,
+                    with: characterAt(index: (indexOf(character: str.last!, array) + 1) % array.count, array))
+
+        if indexOf(character: str.last!, array) == 0 {
+            str = String(generateBruteForce(String(str.dropLast()), fromArray: array)) + String(str.last!)
+        }
+    }
+
+    return str
+}
